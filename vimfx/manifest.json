@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "VimFx-webext",
+  "version": "0.1.0",
+  "permissions": ["experiments.hello"],
+  "background": {
+    "scripts": [
+      "bg.js"
+    ]
+  }
+}
