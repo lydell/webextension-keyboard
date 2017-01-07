@@ -5,6 +5,8 @@ handling.
 
 Bugzilla: [Bug 1215061 - Better keyboard shortcut support][bug-1215061]
 
+Check out the [releases] page to see previous versions and what has changed!
+
 
 ## Motivation
 
@@ -65,15 +67,15 @@ sections.
 
 ## `browser.keyboard`
 
-Requires permission: Yes, since the add-on will be able to disabled all Firefox
+Requires permission: Yes, since the add-on will be able to disable all Firefox
 shortcuts.
 
 `browser.keyboard` only contains one property: `onKey`. These are its exposed
 methods:
 
-- `browser.keyboard.onKey.addListener(keySpec, listener, options = {})`
-- `browser.keyboard.onKey.removeListener(keySpec, listener, options = {})`
-- `browser.keyboard.onKey.hasListener(keySpec, listener, options = {})`
+- `browser.keyboard.onKey.addListener(listener, options = {})`
+- `browser.keyboard.onKey.removeListener(listener, options = {})`
+- `browser.keyboard.onKey.hasListener(listener, options = {})`
 
 The above mirrors `browser.commands.onCommand` on purpose:
 
@@ -87,6 +89,9 @@ Differences to `browser.commands.onCommand`:
   [“modifier+key”][shortcut-values] shortcuts (more or less).
 - Are added programmatically, rather than through manifest.json.
 - Can be removed programmatically.
+- The add-on must examine an `event` object to tell which keys were pressed and
+  determine if one of its keyboard shortcuts was matched, rather than providing
+  a string representing the keyboard shortcut to Firefox.
 - No restrictions on the number of shortcuts.
 
 `browser.commands.onCommand` will still be the promoted API for add-ons that
@@ -106,13 +111,36 @@ Differences to adding a `'keydown'` event listener in a content script:
 
 ### Details
 
-When a `browser.keyboard.onKey` listener is invoked, the `'keydown'` event that
-triggered it is suppressed, as well as the corresponding `'keypress'` and
-`'keyup'` events:
+A `browser.keyboard.onKey` listener is triggered on the `'keydown'` event, a bit
+like this (in terms of DOM APIs; the browser is of course allowed to use
+whatever its UI framework provides):
+
+```js
+uiWindow.addEventListener(
+  'keydown',
+  event => { triggerListeners(prepareEvent(event)) },
+  !options.defaultPreventable
+)
+```
+
+The return value of a `browser.keyboard.onKey` listener determines if the
+`'keydown'` event that triggered it, as well as the corresponding `'keypress'`
+and `'keyup'` events, should be suppressed or not.
+
+- If a truthy value is returned, the events should be suppressed.
+- If a falsy value is returned, the events should _not_ be suppressed.
+
+“Supressing“ an event means:
 
 - Firefox keyboard shortcuts (if any) are _not_ run.
 - The web page never receives the `'keydown'`, `'keypress'` and `'keyup'` events
   (unless `options.defaultPreventable` is `true`; see below).
+
+(Note that add-ons will be able to disable every Firefox shortcut by using
+`browser.keyboard.onKey(() => true)` (while a previous version of this proposal
+made that harder). I think this is fine, though: The user can still type in UI
+text input elements, and can remove the extension by clicking. See [issue #3]
+for more information.)
 
 A `browser.keyboard.onKey` listener is _not_ run if a Firefox UI element that
 can receive keyboard input, such as the location bar, is focused.
@@ -141,14 +169,13 @@ track of the currently focused element in a content script and temporarily use
 
 ### Methods
 
-#### addListener(keySpec, listener, options = {})
+#### addListener(listener, options = {})
 
-Adds a listener for a key press that matches `keySpec`.
+Adds a listener for all key presses.
 
 #### removeListener(keySpec, listener, options = {})
 
-Stop listening to key presses matching `keySpec`. The arguments must match the
-listener to remove.
+Stop listening to key presses. The arguments must match the listener to remove.
 
 #### hasListener(keySpec, listener, options = {})
 
@@ -157,41 +184,27 @@ if it is listening, false otherwise.
 
 ### Parameters
 
-#### keySpec
+### listener
 
-`keySpec` is a plain object. When pressing a key, Firefox will construct a
-[KeyboardEvent] and compare it to `keySpec`. If every property of `keySpec` is
-present in the KeyboardEvent and has the same value as in `keySpec`, `listener`
-will be run.
-
-`keySpec` must specify at least the `key` or `code` property.
+A function that will be called when keys are pressed. It receives one argument,
+a [KeyboardEvent] object.
 
 Regarding the KeyboardEvent:
 
 - `event.type` is always `'keydown'`.
-- Any property that isn’t a string, a number or a boolean are always treated as
-  `undefined` when comparing with `keySpec`. Example properties: `event.view`,
-  `event.currentTarget` and `event.target`.
+- Any property that isn’t a string, a number or a boolean are set to
+  `undefined`, since UI elements cannot be exposed, and it doesn’t make sense to
+  run `.preventDefault()`, for instance. Example properties: `event.view`,
+  `event.currentTarget`, `event.target` and `event.preventDefault`.
 
-Example `keySpec`s:
+The most important properties for API consumers are:
 
-```js
-{
-  key: 'a'
-}
-```
-
-```js
-{
-  code: 'Escape',
-  ctrlKey: true,
-}
-```
-
-### listener
-
-A function that will be called as specified in the previous section about
-`keySpec`. It does not receive any arguments.
+- key
+- code
+- altKey
+- ctrlKey
+- metaKey
+- shiftKey
 
 ### options
 
@@ -229,14 +242,22 @@ Firefox keyboard shortcut to do this today (but the F6 shortcut comes close).
 However, I think this is a good keyboard shortcut to add. This way, there’s no
 need to add a new API just for this little feature.
 
+
 ## How VimFx intends to use these APIs
 
-- Use `browser.keyboard.onKey.addListener()` and
-  `browser.keyboard.onKey.removeListener()` based on:
+- Add a two `onKey` listeners:
 
-  - User preferences.
-  - The current “Vim” mode.
-  - The previously pressed keys.
+  - `browser.keyboard.onKey.addListener(callback1, {defaultPreventable: false})`
+  - `browser.keyboard.onKey.addListener(callback2, {defaultPreventable: true})`
+
+  In `callback1` and `callback2`, VimFx will:
+
+  - Invoke commands based on user preferences.
+  - Invoke commands based on the current “Vim” mode.
+  - Show the keys pressed so far in multi-key shortcuts.
+  - Return `true` (to suppress the event) if:
+    - A command was matched.
+    - A command was _partially_ matched. (See [issue #3] for more information.)
 
 - Add a `browser.commands` command with the shortcut Ctrl+E that runs
   `browser.keyboardShortcutActions.focusContent()`. That will be the way to
@@ -247,11 +268,13 @@ need to add a new API just for this little feature.
 
 [`browser.commands.onCommand`]: https://developer.mozilla.org/Add-ons/WebExtensions/API/commands/onCommand
 [bug-1215061]: https://bugzilla.mozilla.org/show_bug.cgi?id=1215061
+[issue #3]: https://github.com/lydell/webextension-keyboard/issues/3
 [Keybinder]: https://addons.mozilla.org/firefox/addon/keybinder/
 [KeyboardEvent]: https://developer.mozilla.org/docs/Web/API/KeyboardEvent
 [keyconfig]: http://forums.mozillazine.org/viewtopic.php?t=72994
 [Menu Wizard]: https://addons.mozilla.org/firefox/addon/s3menu-wizard/
 [Pentadactyl]: https://addons.mozilla.org/firefox/addon/pentadactyl/
+[releases]: https://github.com/lydell/webextension-keyboard/releases
 [shortcut-values]: https://developer.mozilla.org/Add-ons/WebExtensions/manifest.json/commands#Shortcut_values
 [VimFx]: https://addons.mozilla.org/firefox/addon/vimfx/
 [Vimium]: https://github.com/philc/vimium/
