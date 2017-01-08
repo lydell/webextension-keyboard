@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "VimFx-webext",
   "version": "0.1.0",
-  "permissions": ["experiments.keyboardshortcutactions"],
+  "permissions": ["experiments.keyboardshortcutactions", "experiments.keyboard"],
   "background": {
     "scripts": [
       "background.js"

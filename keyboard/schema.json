@@ -1,0 +1,48 @@
+[
+  {
+    "namespace": "keyboard",
+    "permissions": ["experiments.keyboard"],
+    "types": [
+      {
+        "id": "KeyboardEvent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The string \"keydown\"."
+          },
+          "key": {
+            "type": "string",
+            "description": "The value of the keys or keys pressed by the user."
+          }
+        }
+      }
+    ],
+    "events": [
+      {
+        "name": "onKey",
+        "type": "function",
+        "description": "Fired when the user presses a key, and the WebExtension is allowed to handle that key press.",
+        "parameters": [
+          {
+            "name": "name",
+            "$ref": "KeyboardEvent",
+            "description": "The event object for the key that was pressed."
+          }
+        ]
+      },
+      {
+        "name": "onKeyPreventable",
+        "type": "function",
+        "description": "Fired when the user presses a key, and the WebExtension is allowed to handle that key press, and not if the web page has called `event.preventDefault()`.",
+        "parameters": [
+          {
+            "name": "name",
+            "$ref": "KeyboardEvent",
+            "description": "The event object for the key that was pressed."
+          }
+        ]
+      }
+    ]
+  }
+]

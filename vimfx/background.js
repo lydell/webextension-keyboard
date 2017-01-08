@@ -13,3 +13,11 @@ browser.commands.onCommand.addListener(name => {
       break
   }
 })
+
+browser.keyboard.onKey.addListener(event => {
+  console.log('VimFx-webext onKey', event)
+})
+
+browser.keyboard.onKeyPreventable.addListener(event => {
+  console.log('VimFx-webext onKeyPreventable', event)
+})

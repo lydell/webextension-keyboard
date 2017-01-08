@@ -2,6 +2,13 @@
 clean:
 	rm -f *.xpi
 
+keyboard.xpi:
+	cd keyboard; zip ../keyboard.xpi *
+
+.PHONY: keyboard
+keyboard: keyboard.xpi
+	wget --quiet --post-file=keyboard.xpi http://localhost:8888/; exit 0
+
 keyboardshortcutactions.xpi:
 	cd keyboardshortcutactions; zip ../keyboardshortcutactions.xpi *
 
