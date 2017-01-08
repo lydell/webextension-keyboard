@@ -2,12 +2,12 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
-    <em:id>hello@experiments.addons.mozilla.org</em:id>
-    <em:name>Hello API</em:name>
+    <em:id>keyboardshortcutactions@experiments.addons.mozilla.org</em:id>
+    <em:name>keyboardshortcutactions API</em:name>
     <em:type>256</em:type>
-    <em:version>0.1</em:version>
-    <em:description>Hello API</em:description>
-    <em:creator>Mozilla</em:creator>
+    <em:version>0.1.0</em:version>
+    <em:description>keyboardshortcutactions API</em:description>
+    <em:creator>Simon Lydell</em:creator>
     <em:targetApplication>
       <!-- Firefox -->
       <Description>

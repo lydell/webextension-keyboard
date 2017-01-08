@@ -1,13 +1,13 @@
 .PHONY: clean
 clean:
-	rm hello.xpi
+	rm -f *.xpi
 
-hello.xpi:
-	cd hello; zip ../hello.xpi *
+keyboardshortcutactions.xpi:
+	cd keyboardshortcutactions; zip ../keyboardshortcutactions.xpi *
 
-.PHONY: hello-push
-hello-push: hello.xpi
-	wget --quiet --post-file=hello.xpi http://localhost:8888/; exit 0
+.PHONY: keyboardshortcutactions
+keyboardshortcutactions: keyboardshortcutactions.xpi
+	wget --quiet --post-file=keyboardshortcutactions.xpi http://localhost:8888/; exit 0
 
 .PHONY: vimfx
 vimfx:

@@ -2,10 +2,24 @@
   "manifest_version": 2,
   "name": "VimFx-webext",
   "version": "0.1.0",
-  "permissions": ["experiments.hello"],
+  "permissions": ["experiments.keyboardshortcutactions"],
   "background": {
     "scripts": [
-      "bg.js"
+      "background.js"
     ]
+  },
+  "commands": {
+    "select_location_bar": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L"
+      },
+      "description": "Select the Location Bar"
+    },
+    "focus_content": {
+      "suggested_key": {
+        "default": "Ctrl+E"
+      },
+      "description": "Focus Content"
+    }
   }
 }

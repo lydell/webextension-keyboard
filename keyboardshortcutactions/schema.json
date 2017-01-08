@@ -1,0 +1,21 @@
+[
+  {
+    "namespace": "keyboardshortcutactions",
+    "description": "keyboardshortcutactions API",
+    "permissions": ["experiments.keyboardshortcutactions"],
+    "functions": [
+      {
+        "name": "selectLocationBar",
+        "type": "function",
+        "description": "Executes the \"Select Location Bar\" keyboard shortcut.",
+        "parameters": []
+      },
+      {
+        "name": "focusContent",
+        "type": "function",
+        "description": "Executes the \"Focus Content\" keyboard shortcut.",
+        "parameters": []
+      }
+    ]
+  }
+]
