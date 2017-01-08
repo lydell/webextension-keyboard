@@ -7,13 +7,49 @@
         "id": "KeyboardEvent",
         "type": "object",
         "properties": {
-          "type": {
+          "altKey": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the Alt (Option or ⌥ on OS X) key was active when the key event was generated."
+          },
+          "code": {
             "type": "string",
-            "description": "The string \"keydown\"."
+            "description": "Returns a DOMString with the code value of the key represented by the event."
+          },
+          "ctrlKey": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the Ctrl key was active when the key event was generated."
+          },
+          "isComposing": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the event is fired between after compositionstart and before compositionend."
           },
           "key": {
             "type": "string",
-            "description": "The value of the keys or keys pressed by the user."
+            "description": "Returns a DOMString representing the key value of the key represented by the event."
+          },
+          "locale": {
+            "type": "string",
+            "description": "Returns a DOMString representing a locale string indicating the locale the keyboard is configured for. This may be the empty string if the browser or device doesn't know the keyboard's locale."
+          },
+          "location": {
+            "type": "number",
+            "description": "Returns a Number representing the location of the key on the keyboard or other input device."
+          },
+          "metaKey": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the Meta key (on Mac keyboards, the ⌘ Command key; on Windows keyboards, the Windows key (⊞)) was active when the key event was generated."
+          },
+          "repeat": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the key is being held down such that it is automatically repeating."
+          },
+          "shiftKey": {
+            "type": "boolean",
+            "description": "Returns a Boolean that is true if the Shift key was active when the key event was generated."
+          },
+          "timeStamp": {
+            "type": "string",
+            "description": "The time at which the event was created, in milliseconds. By specification, this value is time since epoch, but in reality browsers' definitions vary; in addition, work is underway to change this to be a DOMHighResTimeStamp instead."
           }
         }
       }

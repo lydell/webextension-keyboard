@@ -15,7 +15,7 @@ class API extends ExtensionAPI {
           const window =
             nsIWindowMediator.getMostRecentWindow('navigator:browser')
           window.setTimeout(() => {
-            fire({type: 'keydown', key: 'a'})
+            fire({key: 'a'})
           }, 0)
           return () => {
             console.log('keyboard.onKey.removeListener', fire)
@@ -27,7 +27,7 @@ class API extends ExtensionAPI {
           const window =
             nsIWindowMediator.getMostRecentWindow('navigator:browser')
           window.setTimeout(() => {
-            fire({type: 'keydown', key: 'b'})
+            fire({key: 'b'})
           }, 0)
           return () => {
             console.log('keyboard.onKeyPreventable.removeListener', fire)

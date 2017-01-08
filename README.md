@@ -74,8 +74,11 @@ shortcuts.
 
 Only available in background scripts.
 
-`browser.keyboard` only contains two events: `onKey` and `onKeyPreventable`.
-They follow the same structure as all other `browser.*.on*` objects:
+`browser.keyboard` only contains two events, `onKey` and `onKeyPreventable`, as
+well as a type for their listener parameter: `KeyboardEvent`.
+
+`browser.keyboard.onKey` and `browser.keyboard.onKeyPreventable` follow the same
+structure as all other `browser.*.on*` objects:
 
 - `browser.keyboard.onKey.addListener(listener)`
 - `browser.keyboard.onKey.removeListener(listener)`
@@ -219,24 +222,7 @@ is, deciding whether to return `true` or `false`.)
 ### The listener parameter
 
 It is a function that will be called when keys are pressed. It receives one
-argument, a [KeyboardEvent] object.
-
-Regarding the KeyboardEvent:
-
-- `event.type` is always `'keydown'`.
-- Any property that isn’t a string, a number or a boolean are set to
-  `undefined`, since UI elements cannot be exposed, and it doesn’t make sense to
-  run `.preventDefault()`, for instance. Example properties: `event.view`,
-  `event.currentTarget`, `event.target` and `event.preventDefault`.
-
-The most important properties for API consumers are:
-
-- key
-- code
-- altKey
-- ctrlKey
-- metaKey
-- shiftKey
+argument, a `browser.keyboard.KeyboardEvent` object.
 
 The return value of `listener` determines if the `'keydown'` event that
 triggered it, as well as the corresponding `'keypress'` and `'keyup'` events,
@@ -244,6 +230,28 @@ should be suppressed or not.
 
 - If a truthy value is returned, the events should be suppressed.
 - If a falsy value is returned, the events should _not_ be suppressed.
+
+### `browser.keyboard.KeyboardEvent
+
+It is very similar to a regular DOM [KeyboardEvent]. These are the available
+properties:
+
+The most important properties for API consumers are:
+
+- altKey
+- code
+- ctrlKey
+- isComposing
+- key
+- locale
+- location
+- metaKey
+- repeat
+- shiftKey
+- timeStamp
+
+See the entire defintion (with types and descriptions) in
+[keyboard/schema.json]([keyboard/schema.json]).
 
 
 ## `browser.keyboardShortcutActions`
