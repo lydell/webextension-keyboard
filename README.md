@@ -231,7 +231,7 @@ should be suppressed or not.
 - If a truthy value is returned, the events should be suppressed.
 - If a falsy value is returned, the events should _not_ be suppressed.
 
-### `browser.keyboard.KeyboardEvent
+### `browser.keyboard.KeyboardEvent`
 
 It is very similar to a regular DOM [KeyboardEvent]. These are the available
 properties:
