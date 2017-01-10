@@ -206,17 +206,25 @@ Reasons for the restrictions on _when_ `browser.keyboard.onKey` and
 
 If am element that can receive text input, and _can_ be manipulated from a
 content script, is focused, `browser.keyboard.onKey` and
-`browser.keyboard.onKeyPreventable` _are_ run. It is up to the add-on author to
-keep track of the currently focused element in a content script, send that back
-to the background script and decide whether or not to suppress key events (that
-is, deciding whether to return `true` or `false`.)
+`browser.keyboard.onKeyPreventable` listeners _are_ run. It is up to the add-on
+author to keep track of the currently focused element in a content script, send
+that back to the background script and decide whether or not to suppress key
+events (that is, deciding whether to return `true` or `false`.)
 
+- Let’s say that `browser.keyboard.onKey` and
+  `browser.keyboard.onKeyPreventable` listeners were _not_ run if the web page
+  was in focus. What would the alternative be? The add-on would have to run
+  `window.addEventListener('keydown', event => {...}, true)` (or similar) in a
+  content page. Then, they’d be in the same situation again: The add-on still
+  has to figure out whether to run its shortcuts or not. And now, the add-on
+  would have to do key handling in two different places. Also, there’s the
+  following points:
 - Add-ons such as VimFx needs to keep track of the currently focused element
   anyway, since its toolbar button (browser action) changes color based on it.
   This allows the user to see if the key presses will result in typed characters
-  or triggered VimFx commands.
+  or trigger VimFx commands.
 - This allows add-ons (such as VimFx) to provide keyboard shortcuts that work
-  even in text inputs.
+  even in text inputs, in a consistent way.
 - (This is also how VimFx works today.)
 
 ### The listener parameter
