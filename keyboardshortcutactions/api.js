@@ -1,8 +1,8 @@
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 const nsIWindowMediator = Cc['@mozilla.org/appshell/window-mediator;1']
-  .getService(Ci.nsIWindowMediator)
+  .getService(Ci.nsIWindowMediator);
 
-Cu.import('resource://gre/modules/Console.jsm')
+Cu.import('resource://gre/modules/Console.jsm');
 
 class API extends ExtensionAPI {
   getAPI(context) {
@@ -13,14 +13,14 @@ class API extends ExtensionAPI {
           // A real implementation of this API would of course share code with
           // the actual Firefox keyboard shortcut.
           const window =
-            nsIWindowMediator.getMostRecentWindow('navigator:browser')
-          window.focusAndSelectUrlBar()
+            nsIWindowMediator.getMostRecentWindow('navigator:browser');
+          window.focusAndSelectUrlBar();
         },
 
         // The proposed Firefox keyboard shortcut for “escaping” from UI
         // elements, returning focus to the content:
         focusContent() {
-          console.log('focusContent')
+          console.log('focusContent');
           // TODO: Implement.
         },
 

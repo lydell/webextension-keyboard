@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "devDependencies": {
+    "eslint": "^3.13.1"
+  }
+}
