@@ -20,7 +20,7 @@ function onShutdown(listener) {
 // --- Start of code to copy to keyboard/api.js ---
 
 let listenersAdded = false;
-const textReceivingElementThatAContentScriptCannotAccessIsFocused = false;
+let textReceivingElementThatAContentScriptCannotAccessIsFocused = false;
 
 const onKeyListeners = new Set();
 const onKeyPreventableListeners = new Set();
@@ -69,6 +69,7 @@ function addListeners() {
   function register(window) {
     addKeyListener(window, false);
     addKeyListener(window, true);
+    addFocusListeners(window);
     console.log('API#getAPI added listeners (should only be done once per window)');
   }
 
@@ -148,6 +149,114 @@ function prepareEvent(event) {
     shiftKey: event.shiftKey,
     timeStamp: event.timeStamp,
   };
+}
+
+function addFocusListeners(window) {
+  const focusListener = event => {
+    updateFocusState(window);
+  };
+  const blurListener = event => {
+    window.setTimeout(() => {
+      updateFocusState(window);
+    }, 50);
+  };
+
+  const useCapture = true;
+  window.addEventListener('focus', focusListener, useCapture);
+  window.addEventListener('blur', blurListener, useCapture);
+  onShutdown(() => {
+    window.removeEventListener('focus', focusListener, useCapture);
+    window.removeEventListener('blur', blurListener, useCapture);
+  });
+}
+
+function updateFocusState(window) {
+  const activeElement = getActiveElement(window);
+
+  if (activeElement === window.gBrowser.selectedBrowser) {
+    // TODO: Ask frame script (vim._send('checkFocusType'))
+    return;
+  }
+
+  textReceivingElementThatAContentScriptCannotAccessIsFocused =
+    isTextReceivingElementThatAContentScriptCannotAccessIsFocused(activeElement);
+}
+
+function getActiveElement(window) {
+  const {activeElement} = window.document;
+
+  if (!activeElement) {
+    return null;
+  }
+
+  // If the active element is a frame, recurse into it. The easiest way to detect
+  // a frame that works both in browser UI and in web page content is to check
+  // for the presence of `.contentWindow`. However, in non-multi-process,
+  // `<browser>` (sometimes `<xul:browser>`) elements have a `.contentWindow`
+  // pointing to the web page content `window`, which we don’t want to recurse
+  // into. The problem is that there are _some_ `<browser>`s which we _want_ to
+  // recurse into, such as the sidebar (for instance the history sidebar), and
+  // dialogs in `about:preferences`. Checking the `contextmenu` attribute seems
+  // to be a reliable test, catching both the main tab `<browser>`s and bookmarks
+  // opened in the sidebar.
+  if (
+    (
+      activeElement.localName === 'browser' &&
+      activeElement.getAttribute('contextmenu') == 'contentAreaContextMenu'
+    ) ||
+    !activeElement.contentWindow
+  ) {
+    return activeElement;
+  }
+
+  return getActiveElement(activeElement.contentWindow);
+}
+
+function isTextReceivingElementThatAContentScriptCannotAccessIsFocused(element) {
+  // TODO.
+  return false;
+  // isActivatable = (element) ->
+  //   return element.localName in ['a', 'button'] or
+  //          (element.localName == 'input' and element.type in [
+  //            'button', 'submit', 'reset', 'image'
+  //          ]) or
+  //          element instanceof XULButtonElement
+
+  // isAdjustable = (element) ->
+  //   return element.localName == 'input' and element.type in [
+  //            'checkbox', 'radio', 'file', 'color'
+  //            'date', 'time', 'datetime', 'datetime-local', 'month', 'week'
+  //          ] or
+  //          element.localName in ['video', 'audio', 'embed', 'object'] or
+  //          element instanceof XULControlElement or
+  //          # Custom video players.
+  //          includes(element.className, 'video') or
+  //          includes(element.className, 'player') or
+  //          # Youtube special case.
+  //          element.classList?.contains('ytp-button') or
+  //          # Allow navigating object inspection trees in th devtools with the
+  //          # arrow keys, even if the arrow keys are used as VimFx shortcuts.
+  //          isDevtoolsElement(element)
+  // isTextInputElement = (element) ->
+  //   return (element.localName == 'input' and element.type in [
+  //            'text', 'search', 'tel', 'url', 'email', 'password', 'number'
+  //          ]) or
+  //          element.localName == 'textarea' or
+  //          element instanceof XULTextBoxElement or
+  //          isContentEditable(element)
+
+  // isTypingElement = (element) ->
+  //   return isTextInputElement(element) or
+  //          # `<select>` elements can also receive text input: You may type the
+  //          # text of an item to select it.
+  //          element.localName == 'select' or
+  //          element instanceof XULMenuListElement
+  // when isTypingElement(element)
+  //   if element.closest?('findbar') then 'findbar' else 'editable'
+  // when isActivatable(element)
+  //   'activatable'
+  // when isAdjustable(element)
+  //   'adjustable'
 }
 
 function getAddon(callback) {
