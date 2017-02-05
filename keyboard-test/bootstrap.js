@@ -3,7 +3,7 @@ const nsIWindowMediator = Cc['@mozilla.org/appshell/window-mediator;1']
   .getService(Ci.nsIWindowMediator);
 const messageManager = Cc['@mozilla.org/globalmessagemanager;1']
   .getService(Ci.nsIMessageListenerManager);
-const { EventManager } = Cu.import('resource://gre/modules/ExtensionUtils.jsm', {});
+const { SingletonEventManager } = Cu.import('resource://gre/modules/ExtensionUtils.jsm', {});
 const { AddonManager } = Cu.import('resource://gre/modules/AddonManager.jsm', {});
 
 Cu.import('resource://gre/modules/Services.jsm');
@@ -36,16 +36,16 @@ class API extends ExtensionAPI {
 
     return {
       keyboard: {
-        onKey: new EventManager(context, 'keyboard.onKey', (fire) => {
-          const callback = data => fire(data);
+        onKey: new SingletonEventManager(context, 'keyboard.onKey', (fire) => {
+          const callback = data => fire.sync(data);
           onKeyListeners.add(callback);
           return () => {
             onKeyListeners.remove(callback);
           };
         }).api(),
 
-        onKeyPreventable: new EventManager(context, 'keyboard.onKeyPreventable', (fire) => {
-          const callback = data => fire(data);
+        onKeyPreventable: new SingletonEventManager(context, 'keyboard.onKeyPreventable', (fire) => {
+          const callback = data => fire.sync(data);
           onKeyPreventableListeners.add(callback);
           return () => {
             onKeyPreventableListeners.remove(callback);
@@ -69,6 +69,7 @@ function addListeners() {
   function register(window) {
     addKeyListener(window, false);
     addKeyListener(window, true);
+    console.log('API#getAPI added listeners (should only be done once per window)');
   }
 
   for (const window of WindowListManager.browserWindows()) {
@@ -120,11 +121,11 @@ function addKeyListener(window, preventable = true) {
     window.removeEventListener('keydown', keydownListener, useCapture);
     window.removeEventListener('keyup', keyupListener, useCapture);
   });
-  console.log('API#getAPI added listeners (should only be done once per window)');
 }
 
 function triggerListeners(data, preventable) {
   const set = preventable ? onKeyPreventableListeners : onKeyListeners;
+  console.log('triggerListeners', preventable, set);
   return Array.from(set)
     .map((listener) => {
       const suppress = listener(data);
@@ -257,7 +258,20 @@ const WindowListManager = {
 const keyboardAPI = new API();
 
 function makeAPI() {
-  return keyboardAPI.getAPI({ mock: true });
+  return keyboardAPI.getAPI({
+    active: true,
+    runSafe: (callback, ...args) => {
+      callback(...args);
+    },
+    callOnClose: () => {
+      // Run when `.addListener` is run.
+      console.log('callOnClose');
+    },
+    forgetOnClose: () => {
+      // Run when `.removeListener');
+      console.log('forgetOnClose');
+    },
+  });
 }
 
 function startup() {
@@ -279,8 +293,6 @@ function uninstall() {}
 
 function mock1(browser) {
   console.log('mock1 start', browser);
-
-  // TODO: Figure out why triggered twice.
 
   browser.keyboard.onKey.addListener((event) => {
     console.log('mock1 onKey1', event);
