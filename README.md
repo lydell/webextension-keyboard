@@ -108,7 +108,8 @@ Differences to `browser.commands.onCommand`:
 `browser.commands.onCommand` will still be the promoted API for add-ons that
 only add a couple of keyboard shortcuts to some of its functionality.
 `browser.keyboard.onKey` and `browser.keyboard.onKeyPreventable` are for add-ons
-whose sole purpose is dealing with keyboard shortcuts in a more advanced way.
+whose sole purpose is dealing with keyboard shortcuts, and doing so in a more
+advanced way.
 
 `browser.keyboard.onKey` and `browser.keyboard.onKeyPreventable` can override:
 
@@ -178,10 +179,10 @@ and `'keyup'` events, should be suppressed or not.
     anything in Firefox.
 
 (Note that add-ons will be able to disable every Firefox shortcut by using
-`browser.keyboard.onKey(() => true)` (while a previous version of this proposal
-made that harder). I think this is fine, though: The user can still type in UI
-text input elements, and can remove the extension by clicking. See [issue #3]
-for more information.)
+`browser.keyboard.onKey.addListener(() => true)` (while a previous version of
+this proposal made that harder). I think this is fine, though: The user can
+still type in UI text input elements, and can remove the extension by clicking.
+See [issue #3] for more information.)
 
 If any element that can receive text input, but cannot be manipulated from a
 content script, is focused, `browser.keyboard.onKey` and
@@ -204,7 +205,7 @@ Reasons for the restrictions on _when_ `browser.keyboard.onKey` and
   elements that can receive keyboard input) and return to the “content area” is
   so important (more on this later).
 
-If am element that can receive text input, and _can_ be manipulated from a
+If an element that can receive text input, and _can_ be manipulated from a
 content script, is focused, `browser.keyboard.onKey` and
 `browser.keyboard.onKeyPreventable` listeners _are_ run. It is up to the add-on
 author to keep track of the currently focused element in a content script, send
@@ -214,11 +215,11 @@ events (that is, deciding whether to return `true` or `false`.)
 - Let’s say that `browser.keyboard.onKey` and
   `browser.keyboard.onKeyPreventable` listeners were _not_ run if the web page
   was in focus. What would the alternative be? The add-on would have to run
-  `window.addEventListener('keydown', event => {...}, true)` (or similar) in a
-  content page. Then, they’d be in the same situation again: The add-on still
-  has to figure out whether to run its shortcuts or not. And now, the add-on
-  would have to do key handling in two different places. Also, there’s the
-  following points:
+  `window.addEventListener('keydown', event => {...}, true)` (or similar) in
+  content scripts for every frame of a page. Then, they’d be in the same
+  situation again: The add-on still has to figure out whether to run its
+  shortcuts or not. And now, the add-on would have to do key handling in several
+  different places. Also, there’s the following points:
 - Add-ons such as VimFx needs to keep track of the currently focused element
   anyway, since its toolbar button (browser action) changes color based on it.
   This allows the user to see if the key presses will result in typed characters
@@ -243,8 +244,6 @@ should be suppressed or not.
 
 It is very similar to a regular DOM [KeyboardEvent]. These are the available
 properties:
-
-The most important properties for API consumers are:
 
 - altKey
 - code
