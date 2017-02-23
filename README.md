@@ -8,6 +8,18 @@ Bugzilla: [Bug 1215061 - Better keyboard shortcut support][bug-1215061]
 Check out the [releases] page to see previous versions and what has changed!
 
 
+## :warning: Abandoned :warning:
+
+These proposals are **too ambitious and complicated,** and provides too little
+benefit to be worth it. **[Longer explanation.][bug-1215061-c23]**
+
+The primary use case for these APIs was to use them in [VimFx]. These are the
+new plans for VimFx:
+
+- See the [longer explanation][bug-1215061-c23] mentioned above.
+- [Bug 1341416 - WebExtensions: Implement \_focus\_content\_area command][bug-1341416]
+
+
 ## Motivation
 
 - Allow creating add-ons whose purpose is to customize Firefox’s own keyboard
@@ -315,6 +327,8 @@ need to add a new API just for this little feature.
 
 [`browser.commands.onCommand`]: https://developer.mozilla.org/Add-ons/WebExtensions/API/commands/onCommand
 [bug-1215061]: https://bugzilla.mozilla.org/show_bug.cgi?id=1215061
+[bug-1215061-c23]: https://bugzilla.mozilla.org/show_bug.cgi?id=1215061#c23
+[bug-1341416]: https://bugzilla.mozilla.org/show_bug.cgi?id=1341416
 [issue #3]: https://github.com/lydell/webextension-keyboard/issues/3
 [Keybinder]: https://addons.mozilla.org/firefox/addon/keybinder/
 [KeyboardEvent]: https://developer.mozilla.org/docs/Web/API/KeyboardEvent
